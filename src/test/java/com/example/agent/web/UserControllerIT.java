@@ -1,15 +1,26 @@
 package com.example.agent.web;
 
 import com.example.agent.domain.User;
+import com.example.agent.agent.BacklogAgent;
+import dev.langchain4j.model.anthropic.AnthropicChatModel;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 class UserControllerIT {
+
+    @MockBean
+    AnthropicChatModel anthropicChatModel;
+
+    @MockBean
+    BacklogAgent backlogAgent;
 
     @Autowired
     WebTestClient web;
