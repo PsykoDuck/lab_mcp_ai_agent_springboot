@@ -1,7 +1,7 @@
 package com.example.agent.web;
 
 import com.example.agent.agent.BacklogAgent;
-import dev.langchain4j.model.anthropic.AnthropicChatModel;
+import dev.langchain4j.model.chat.ChatModel;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 class AgentControllerIT {
 
     @MockBean
-    AnthropicChatModel anthropicChatModel;
+    ChatModel chatModel;
 
     @MockBean
     BacklogAgent backlogAgent;

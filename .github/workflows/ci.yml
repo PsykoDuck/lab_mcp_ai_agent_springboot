@@ -42,3 +42,46 @@ jobs:
           tags: lab-mcp-ai-agent:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  kubernetes:
+    runs-on: ubuntu-latest
+    needs: docker-build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Start Minikube
+        uses: medyagh/setup-minikube@master
+
+      - name: Build Docker image in Minikube
+        run: |
+          eval $(minikube docker-env)
+          docker build -t ai-agent:dev .
+
+      - name: Create namespace and secrets
+        run: |
+          kubectl create namespace lab-agent
+          kubectl create secret generic agent-secrets \
+            --from-literal=ANTHROPIC_API_KEY=ci-stub \
+            --from-literal=GITHUB_TOKEN=ci-stub \
+            -n lab-agent
+
+      - name: Deploy AI agent
+        run: |
+          kubectl apply -f k8s/ai-agent.yaml
+          kubectl set env deployment/ai-agent SPRING_PROFILES_ACTIVE=ci -n lab-agent
+
+      - name: Wait for deployment
+        run: kubectl rollout status deployment/ai-agent -n lab-agent --timeout=120s
+
+      - name: Test actuator health
+        run: |
+          kubectl port-forward svc/ai-agent 8080:8080 -n lab-agent &
+          sleep 5
+          curl --fail http://localhost:8080/actuator/health
